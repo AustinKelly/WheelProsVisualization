@@ -262,7 +262,9 @@ wheels$offbin <- cut(wheels$Offset,
 wheels <- wheels[!is.na(wheels$StoreCode),]
 summary(diams)
 
+# Send the reworked data to a new file
 write.csv(wheels, "CleanData.csv")
+
 
 # Number of Records with DTC A#'s vs. Miscellaneous
 arts <- sum(!is.na(wheels$`DTArticle#`))
