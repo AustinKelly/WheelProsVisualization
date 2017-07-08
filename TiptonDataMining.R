@@ -10,6 +10,11 @@ summary(wheels)
 # Get rid of the unneccessary cols
 wheels$`YTD Through` <- NULL
 wheels$`Site#` <- NULL
+wheels$Cost <- NULL
+wheels$`MTD$` <- NULL
+wheels$`YTD$` <- NULL
+wheels$SuggestedRetail_Map <- NULL
+wheels$`MFG#` <- NULL
 summary(wheels)
 
 # Single out the diameter column. We want to look at that first
@@ -101,7 +106,10 @@ wbp[wbp == "8x200.00"] <- "8x200"
 wbp[wbp == "8x210.00"] <- "8x210"
 
 # Check the results
-sort(unique(wheels$BoltPattern1))
+pcd <- sort(unique(wbp))
+pcd
+
+
 # Results look good. Let's see what the table looks like
 table(wheels$Diameter)
 table(wheels$Width)
@@ -155,20 +163,117 @@ plot(ws$Width, ws$x, type = "h", xlab = "Widths", ylab = "Volume")
 
 # The histograms of volume look very proportionate to the histograms of the overall count of records. 
 
+#
+# Rim Diameter/Width combined
+#
+wheels$wheelsize <- paste(wheels$Diameter,'x', wheels$Width)
+wheelsize <- wheels$wheelsize
+head(wheelsize)
+wd <- data.frame(aggregate(quants, by=list(Size = wheelsize), FUN = sum))
+wd
+plot(wd$x, type = "h", xaxt = "n", xlab = "Sizes", ylab = "Volume")
+axis(1, at=1:82, labels = wd$Size)
 
-# TODO:
+#Let's look at volumes above 2000
+wdmax <- wd[wd$x > 2000,]
+wdmax
+par(las=3)
+plot(wdmax$x, type = "h", xaxt = "n", xlab = "Sizes", ylab = "Volume", main = "Volume by Size")
+axis(1, at=1:10, labels = wdmax$Size)
+
+
 #
 # - Rim Diameter/Bolt Pattern (combined)
+#
+wheels$diamBP <- paste(wheels$Diameter, wheels$BoltPattern1)
+diamBP <- wheels$diamBP
+head(diamBP)
+dbp <- data.frame(aggregate(quants, by=list('Diam&PCD' = diamBP), FUN = sum))
+dbp
+summary(dbp$x)
+# Min.     1st Qu.  Median   Mean    3rd Qu.    Max. 
+# -12.0     6.0      45.0    343.8   219.5     4581.0 
+
+dbmax <- dbp[dbp$x > 1000,] # Currently an arbitrary value
+dbmax
+par(las = 3, mar=c(6,2,2,1)) #mar = c(bottom, left, top, right)
+plot(dbmax$x, type = "h", xaxt = "n", xlab = "", ylab = "Volume", main = "Most Popular Diameter/Bolt Pattern")
+axis(1, at = 1:25, labels = dbmax$Diam.PCD)
+
+#
 # - Rim Diameter/Bolt Pattern/Offset (combined)
-# 
-# Group by Region at the end
+# Maybe we should be looking at this as a sub-group of Diameter/Bolt Pattern. 
+#
+wheels$diamBPOffs <- paste(diamBP, wheels$Offset)
+diamBPOffs <- wheels$diamBPOffs
+head(diamBPOffs)
+dbo <- data.frame(aggregate(quants, by=list(Motley=diamBPOffs), FUN=sum))
+dbo # Just under 900 different combos. Let's see if any stick out. We may need to start binning the offsets...
+summary(dbo$x)
+# Min.    1st Qu.  Median    Mean  3rd Qu.  Max. 
+# -4.00    5.00   20.00     78.39   67.00   1835.00 
+#Let's see what 100 and above look like
+dbomax <- dbo[dbo$x > 800,]
+par(mar = c(7, 2, 1, 1))
+plot(dbomax$x, type = "h", xaxt = 'n', xlab = "", ylab = "Volume", main = "Diameter, PCD and ET")
+axis(1, at = 1:12, labels = dbomax$Motley)
 
 
-# Number of DTC A#'s vs. miscellaneous
+#
+summary(wheels)
+
+# Time to bin the offsets. Let's see what the distribution of the offsets look like.
+hist(wheels$Offset)
+offs <- hist(wheels$Offset, xlab = "Offset from Zero", ylab = NULL, xaxt = "n", xlim = c(-50,60), labels = TRUE, main = "Offsets Distribution", col = "green", border = "blue")
+axis(side = 1, at = seq(-50,60,5))
+
+# Bin offsets to properly display with Diameter, Bolt Pattern and Offset.
+# Grouping by 10 seems to be adequate
+# <-30, (-29,-20), (-19,-10),(-9,0), (1,10), (11,20), (21,30), (31,40), >40
+
+# using seq(-30,40,10) which will give us 8 break points. Thus, we need 7 labels. 
+summary(wheels$Offset)
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+# -98.000 -12.000   0.000   7.595  25.000 111.000    1077 
+
+# Anything less than -50 and anything greater than 60 is just ridiculous. Let's get  rid of these records
+wheels <- wheels[wheels$Offset >= -50,]
+wheels <- wheels[wheels$Offset <= 60,]
+summary(wheels$Offset)
+
+breaks <- seq(-50,60,10)
+breaks
+length(breaks) 
+
+# There are 12 breaks, therefore we need 11 labels
+offlabs <- c(
+  "(-50,-40)", "(-39,-30)","(-29,-20)",
+  "(-19,-10)", "(-9,0)",   "(1,10)",
+  "(11,19)",   "(20,29)",  "(30,39)",
+  "(40,49)", ">50"
+)
+
+wheels$offbin <- cut(wheels$Offset, 
+                     breaks =  seq(-50,60,10), 
+                     labels = offlabs)
+
+# Everything has been binned. 
+# Time to get rid of the rows with NA values
+wheels <- wheels[!is.na(wheels$StoreCode),]
+summary(diams)
+
+write.csv(wheels, "CleanData.csv")
+
+# Number of Records with DTC A#'s vs. Miscellaneous
 arts <- sum(!is.na(wheels$`DTArticle#`))
 arts
 
+narts <- sum(is.na(wheels$`DTArticle#`)) # We don't have article numbers for these. 
+narts
 
+# Total number of records
+total <- (arts + narts)
+total #24632
 
 
 
