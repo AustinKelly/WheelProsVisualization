@@ -1,0 +1,47 @@
+*** email_SalesDisocuntTireKT_6-30-2017_11.02.07_PM.csv ***
+
+YTD Through- This column will be deleted. It has all the same dates.	
+
+Site#- This column will also be deleted. It is of no value to us (presumably used by the manufacturer).
+
+SiteID	- This is a unique SAP designated ID for each store code. 
+
+StoreCode- This is the store "name." These are unique by store which are grouped by region	
+
+Region- Grouping of stores. Are generally entire states or sub-regions per state.	
+
+Quantity- This is the total quantity of product shipped per transaction to the store.	
+
+GTIN/VPN- Manufacturer's designator as a universal product code (UPC)	
+
+Brand- Particular brand of the product being sold. 	
+
+Style- Name of the product	
+
+Diameter- Overall wheel diameter.	
+
+Width- Overall wheel width	
+
+BoltPattern1- This is the primary bolt pattern. Bolt pattern is comprised of a number of studs on the hub of the vehicle 
+	which lie on a circle with a given diameter. 
+	Example:- Austin has a 2010 Nissan Frontier. There are 6 lug nuts holding the wheel on. The overall diameter of the 				circle for these lug nuts is 4.5" or 114.3mm.	
+		- Tom owns a 2009 Dodge Challenger which has a bolt pattern of 5-115. 5 lug nuts which lie on a circle with 			diameter of 115mm
+		- Ben owns a 2016 Toyota Prius. The bolt pattern for this vehicle is 5-114.3. 5 lugs. 114.3mm diameter.
+
+BoltPattern2- If this value exists, this means there is a second bolt pattern drilled into the wheel to allow for a wide range 	of applications	
+
+Offset- This is the distance from the centerline of the wheel to the mounting surface. I will group these into bins. 
+
+Finish- Type of surface of the wheel and whether or not it is painted. 
+
+Cost- Discount Tire's cost of purchasing the wheel.	
+
+SuggestedRetail_Map- I am unsure about this variable. It is likely it will not pertain to us and will be deleted.	
+
+MFG#- This is the manufacturer's part number that they use internally.	
+
+DTArticle#- (If exists) Discount Tire's product code. This is used by us internally. If there is no value here, then it is a "miscellaneous" product. This is what will be investigated the most to see what the stores are buying.  	
+
+MTD$- Total cost of transaction for Discount Tire.	
+
+YTD$- Year to date purchases of this particular product (I believe. We will likely not use this column either.)
